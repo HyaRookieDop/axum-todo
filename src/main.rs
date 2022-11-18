@@ -7,11 +7,11 @@ mod model;
 mod response;
 use axum::{
     extract::Extension,
-    routing::{get, post,delete,put},
+    routing::{get, post},
     Router,
 };
 use dotenv::dotenv;
-use handler::{todo_list, usage};
+use handler::{todo_item, todo_list, usage};
 pub use response::Response;
 pub type Result<T> = std::result::Result<T, error::AppError>;
 
@@ -32,9 +32,21 @@ async fn main() {
     // 路由
     let app = Router::new()
         .route("/", get(usage::usage))
-        .route("/create", post(todo_list::create))
-        .route("/all", get(todo_list::all))
-        .route("/todo/:list_id", get(todo_list::find).delete(todo_list::delete).put(todo_list::update))
+        .route("/todo", post(todo_list::create).get(todo_list::all))
+        .route(
+            "/todo/:list_id",
+            get(todo_list::find)
+                .delete(todo_list::delete)
+                .put(todo_list::update),
+        )
+        .route("/todo/items", post(todo_item::create))
+        .route("/todo/:list_id/items", get(todo_item::all))
+        .route(
+            "/todo/:list_id/items/:item_id",
+            get(todo_item::find)
+                .delete(todo_item::delete)
+                .put(todo_item::update),
+        )
         .layer(Extension(model::AppState { pool }));
     // 绑定到配置文件设置的地址
     axum::Server::bind(&cfg.web.addr.parse().unwrap())

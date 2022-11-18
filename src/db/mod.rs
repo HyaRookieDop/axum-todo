@@ -4,6 +4,7 @@ use tokio_pg_mapper::FromTokioPostgresRow;
 use tokio_postgres::{types::ToSql, GenericClient, Statement};
 
 pub mod todo_list;
+pub mod todo_item;
 
 async fn get_stmt<C: GenericClient>(client: &C, sql: &str) -> Result<Statement> {
     client.prepare(sql).await.map_err(AppError::from)
